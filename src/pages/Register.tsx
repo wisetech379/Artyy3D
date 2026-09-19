@@ -44,43 +44,44 @@ export default function Register() {
   };
 
   return (
-    <div className="mx-auto flex min-h-[70vh] max-w-md flex-col justify-center px-4 py-12">
-      <div className="rounded-2xl border border-white/5 bg-surface p-8 shadow-xl">
-        <h1 className="mb-6 text-2xl font-bold text-white">Create an Account</h1>
+    <div className="mx-auto flex min-h-[75vh] max-w-md flex-col justify-center px-4 py-12">
+      <div className="rounded-2xl border border-neutral-200 bg-white p-8 shadow-sm">
+        <h1 className="mb-2 text-2xl font-bold tracking-tight text-neutral-900">Create an Account</h1>
+        <p className="mb-6 text-sm text-neutral-500">Sign up to get started with Artyy 3D</p>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="mb-1 block text-sm font-medium text-white/70">Full Name</label>
+            <label className="mb-1 block text-sm font-medium text-neutral-700">Full Name</label>
             <input
               type="text"
               required
               value={formData.fullName}
               onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
-              className="w-full rounded-lg border border-white/10 bg-black/20 p-3 text-sm text-white focus:border-ember focus:outline-none"
+              className="w-full rounded-xl border border-neutral-300 bg-white p-3 text-sm text-neutral-900 placeholder:text-neutral-400 outline-none transition focus:border-orange-500 focus:ring-1 focus:ring-orange-500"
               placeholder="John Doe"
             />
           </div>
 
           <div>
-            <label className="mb-1 block text-sm font-medium text-white/70">Email</label>
+            <label className="mb-1 block text-sm font-medium text-neutral-700">Email</label>
             <input
               type="email"
               required
               value={formData.email}
               onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-              className="w-full rounded-lg border border-white/10 bg-black/20 p-3 text-sm text-white focus:border-ember focus:outline-none"
+              className="w-full rounded-xl border border-neutral-300 bg-white p-3 text-sm text-neutral-900 placeholder:text-neutral-400 outline-none transition focus:border-orange-500 focus:ring-1 focus:ring-orange-500"
               placeholder="you@example.com"
             />
           </div>
 
           <div>
-            <label className="mb-1 block text-sm font-medium text-white/70">Password</label>
+            <label className="mb-1 block text-sm font-medium text-neutral-700">Password</label>
             <input
               type="password"
               required
               value={formData.passwordHash}
               onChange={(e) => setFormData({ ...formData, passwordHash: e.target.value })}
-              className="w-full rounded-lg border border-white/10 bg-black/20 p-3 text-sm text-white focus:border-ember focus:outline-none"
+              className="w-full rounded-xl border border-neutral-300 bg-white p-3 text-sm text-neutral-900 placeholder:text-neutral-400 outline-none transition focus:border-orange-500 focus:ring-1 focus:ring-orange-500"
               placeholder="••••••••"
             />
           </div>
@@ -88,16 +89,16 @@ export default function Register() {
           <button
             type="submit"
             disabled={loading}
-            className="flex w-full items-center justify-center gap-2 rounded-full bg-ember py-3 text-sm font-semibold text-white transition-all hover:bg-orange-500 disabled:opacity-50"
+            className="flex w-full items-center justify-center gap-2 rounded-xl bg-orange-500 py-3 text-sm font-semibold text-white shadow-sm transition-all hover:bg-orange-600 active:scale-95 disabled:opacity-50"
           >
             {loading && <Loader2 size={18} className="animate-spin" />}
-            Register
+            <span>Register</span>
           </button>
         </form>
 
-        <p className="mt-6 text-center text-sm text-white/50">
+        <p className="mt-6 text-center text-sm text-neutral-500">
           Already have an account?{' '}
-          <Link to="/login" className="text-ember hover:underline">
+          <Link to="/login" className="font-medium text-orange-600 hover:underline">
             Sign In
           </Link>
         </p>
