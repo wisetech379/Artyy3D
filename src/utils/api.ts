@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_BASE = 'https://localhost:7254/api';
+const API_BASE = 'https://grateful-elegance-production-eda6.up.railway.app/api';
 
 export const api = axios.create({
   baseURL: API_BASE,
