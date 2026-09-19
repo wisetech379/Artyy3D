@@ -32,7 +32,7 @@ export default function Home() {
   const [featured, setFeatured] = useState<Product[]>([]);
 
   useEffect(() => {
-    const API_BASE = 'https://localhost:7254/api';
+const API_BASE = 'https://grateful-elegance-production-eda6.up.railway.app/api';
     const load = async () => {
       try {
         const res = await fetch(`${API_BASE}/Products`);
