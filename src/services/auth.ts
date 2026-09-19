@@ -1,4 +1,4 @@
-const API_BASE = 'https://localhost:7254/api';
+const API_BASE = 'https://grateful-elegance-production-eda6.up.railway.app/api';
 
 export interface RegisterDto {
   fullName: string;
@@ -12,7 +12,6 @@ export interface LoginDto {
 }
 
 export const authService = {
-
   register: async (data: RegisterDto) => {
     const res = await fetch(`${API_BASE}/Auth/register`, {
       method: 'POST',
@@ -23,7 +22,6 @@ export const authService = {
     return res.json();
   },
 
-
   login: async (data: LoginDto) => {
     const res = await fetch(`${API_BASE}/Auth/login`, {
       method: 'POST',
@@ -32,22 +30,20 @@ export const authService = {
     });
     if (!res.ok) throw new Error(await res.text());
     const result = await res.json();
-    
-   
+
     if (result.token) {
       localStorage.setItem('token', result.token);
     }
     return result;
   },
 
- 
   logout: () => {
     localStorage.removeItem('token');
   },
 
-  
   getToken: () => localStorage.getItem('token'),
 };
+
 export const authFetch = async (url: string, options: RequestInit = {}) => {
   const token = authService.getToken();
   const headers = {
