@@ -9,7 +9,7 @@ import { useSEO } from '@/hooks/useSEO';
 import { useCart } from '@/context/CartContext';
 import { useAuth } from '@/context/AuthContext';
 import { formatPrice } from '@/utils/format';
-import { authFetch } from '@/services/auth';
+import api from '@/utils/api';
 
 
 const INSTAPAY_USERNAME = 'faresyoussef423@instapay'; 
@@ -105,41 +105,28 @@ export default function Checkout() {
     };
 
     try {
-      const response = await authFetch('https://localhost:7254/api/Orders', {
-        method: 'POST',
-        body: JSON.stringify(orderPayload),
+      const response = await api.post('/Orders', orderPayload);
+
+      let orderId = Math.floor(100000 + Math.random() * 900000);
+      const resData = response.data;
+      if (resData && (resData.id || resData.orderId)) {
+        orderId = resData.id || resData.orderId;
+      }
+
+      clear();
+      toast.success('Order Placed Successfully! 🎉', {
+        description: `Confirmation email sent to ${data.email}. We will contact you regarding shipping.`,
       });
 
-      if (response.ok) {
-        let orderId = Math.floor(100000 + Math.random() * 900000);
-        try {
-          const resData = await response.json();
-          if (resData && (resData.id || resData.orderId)) {
-            orderId = resData.id || resData.orderId;
-          }
-        } catch {
-          // ignore parse error if response body is empty or not json
-        }
-
-        clear();
-        toast.success('Order Placed Successfully! 🎉', {
-          description: `Confirmation email sent to ${data.email}. We will contact you regarding shipping.`,
-        });
-
-        navigate('/order-success', {
-          state: { orderId, email: data.email, paymentMethod: data.payment },
-          replace: true,
-        });
-      } else {
-        const err = await response.text();
-        toast.error('Order Submission Failed', {
-          description: err || 'Please verify your details and try again.',
-        });
-      }
-    } catch (error) {
+      navigate('/order-success', {
+        state: { orderId, email: data.email, paymentMethod: data.payment },
+        replace: true,
+      });
+    } catch (error: any) {
       console.error('Order Submission Error:', error);
-      toast.error('Network Error', {
-        description: 'Unable to reach the server. Please check your connection.',
+      const errMsg = error.response?.data || error.message;
+      toast.error('Order Submission Failed', {
+        description: typeof errMsg === 'string' ? errMsg : 'Please verify your details and try again.',
       });
     } finally {
       setSubmitting(false);

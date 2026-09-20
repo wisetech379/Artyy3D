@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Package, Clock, CheckCircle2, Truck, AlertCircle } from 'lucide-react';
 import { toast } from 'sonner';
 import { useAuth } from '@/context/AuthContext';
+import api from '@/utils/api';
 
 interface OrderItem {
   id: number;
@@ -52,26 +53,11 @@ export default function MyOrders() {
       return;
     }
 
-    const token = localStorage.getItem('token');
-    const headers: Record<string, string> = {
-      'Content-Type': 'application/json',
-    };
-    if (token) {
-      headers['Authorization'] = `Bearer ${token}`;
-    }
-
     setLoading(true);
-    fetch(`https://localhost:7254/api/Orders/my-orders?email=${encodeURIComponent(email)}`, {
-      headers,
-    })
-      .then(async (res) => {
-        if (!res.ok) {
-          const errorData = await res.json().catch(() => null);
-          throw new Error(errorData?.message || errorData?.error || 'Failed to fetch orders');
-        }
-        return res.json();
-      })
-      .then((data) => {
+    api
+      .get(`/Orders/my-orders?email=${encodeURIComponent(email)}`)
+      .then((response) => {
+        const data = response.data;
         setOrders(Array.isArray(data) ? data : []);
       })
       .catch((err) => {

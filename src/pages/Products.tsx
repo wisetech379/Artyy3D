@@ -5,6 +5,7 @@ import { useSEO } from '@/hooks/useSEO';
 import { Reveal } from '@/components/ui';
 import { ProductCard } from '@/components/ProductCard';
 import type { Product, Category } from '@/types';
+import api from '@/utils/api';
 
 type SortOption = 'featured' | 'price-asc' | 'price-desc' | 'rating';
 
@@ -62,21 +63,18 @@ export default function Products() {
   }, [query, category, sort, productsList]);
 
   useEffect(() => {
-    const BACKEND_URL = 'https://localhost:7254';
-
     const loadProducts = async () => {
       try {
         setLoading(true);
-        const response = await fetch(`${BACKEND_URL}/api/Products`);
-        if (!response.ok) throw new Error('Failed to fetch products');
-
-        const data = await response.json();
+        const response = await api.get('/Products');
+        const data = response.data;
 
         const mapped: Product[] = (data || []).map((item: any) => {
           let img = item.imageUrl || (item.images && item.images[0]) || '';
 
           if (img && !img.startsWith('http') && !img.startsWith('data:')) {
-            img = `${BACKEND_URL}${img.startsWith('/') ? '' : '/'}${img}`;
+            const base = api.defaults.baseURL?.replace('/api', '') || '';
+            img = `${base}${img.startsWith('/') ? '' : '/'}${img}`;
           }
 
           if (!img) {

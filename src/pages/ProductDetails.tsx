@@ -8,6 +8,7 @@ import { ProductCard } from '@/components/ProductCard';
 import { useCart } from '@/context/CartContext';
 import type { Product, Category } from '@/types';
 import { formatPrice } from '@/utils/format';
+import api from '@/utils/api';
 
 interface ApiProductItem {
   id: number | string;
@@ -50,16 +51,11 @@ export default function ProductDetails() {
   useEffect(() => {
     if (!id) return;
 
-    const API_BASE = 'https://localhost:7254/api';
-
     const load = async () => {
       try {
-        const res = await fetch(`${API_BASE}/Products/${id}`);
-        if (!res.ok) {
-          setProduct(null);
-          return;
-        }
-        const data: ApiProductItem = await res.json();
+        const res = await api.get(`/Products/${id}`);
+        const data: ApiProductItem = res.data;
+
         const mapped: Product = {
           id: String(data.id),
           name: data.name ?? 'Unknown Product',
@@ -79,8 +75,8 @@ export default function ProductDetails() {
         setProduct(mapped);
         setSelectedColor(AVAILABLE_COLORS[0].name);
 
-        const listRes = await fetch(`${API_BASE}/Products`);
-        const listData: ApiProductItem[] = await listRes.json();
+        const listRes = await api.get('/Products');
+        const listData: ApiProductItem[] = listRes.data;
         const mappedList: Product[] = (listData || []).map((item: ApiProductItem) => ({
           id: String(item.id),
           name: item.name ?? 'Unknown Product',

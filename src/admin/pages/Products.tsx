@@ -6,7 +6,7 @@ import { Plus, Search, Trash2, Edit, Upload } from 'lucide-react';
 import api from '../../utils/api';
 
 const ALL_CATEGORIES = ['Home', 'Makeup', 'Doctors', 'Cars', 'Graduation Projects'];
-const BACKEND_URL = 'https://localhost:7254';
+const BACKEND_URL = 'https://grateful-elegance-production-8692.up.railway.app';
 
 export default function ProductsPage() {
   const [items, setItems] = useState<any[]>([]);

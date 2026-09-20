@@ -3,7 +3,7 @@ import api from '../../utils/api';
 import AdminLayout from '../layouts/AdminLayout';
 import { Sparkles, Plus, X, Download, FileText, CheckCircle2, Clock, AlertCircle } from 'lucide-react';
 
-const API_BASE_URL = 'https://localhost:7254';
+const API_BASE_URL = 'https://grateful-elegance-production-8692.up.railway.app';
 
 export interface CustomOrder {
   id: number;
