@@ -1,7 +1,6 @@
 import { Link } from 'react-router-dom';
 import { Logo } from './Logo';
 import { Linkedin, Phone, Store } from 'lucide-react';
-
 const footerLinks = {
   Company: [
     { to: '/about', label: 'About' },
