@@ -54,7 +54,7 @@ function extractImageUrls(images: (ApiProductImage | string)[] | undefined, fall
   return fallback ? [fallback] : ['/img/placeholder.png'];
 }
 
-const AUTO_SLIDE_INTERVAL = 4000; // 4 ثواني
+const AUTO_SLIDE_INTERVAL = 7000; // 7 ثواني
 const TRANSITION_DURATION = 700; // مللي ثانية
 
 export default function ProductDetails() {
@@ -126,7 +126,7 @@ export default function ProductDetails() {
     load();
   }, [id]);
 
-  // Auto-slide: بيتحرك تلقائيًا كل 4 ثواني، ويتوقف لو المستخدم بيعمل hover أو لو صورة واحدة بس
+  // Auto-slide: بيتحرك تلقائيًا كل 7 ثواني، ويتوقف لو المستخدم بيعمل hover أو لو صورة واحدة بس
   useEffect(() => {
     if (!product || product.images.length <= 1 || isHovering) {
       return;
@@ -225,11 +225,10 @@ export default function ProductDetails() {
                   src={img}
                   alt={`${product.name} ${i + 1}`}
                   draggable={false}
-                  className="absolute inset-0 h-full w-full select-none object-cover transition-[opacity,transform] ease-in-out"
+                  className="absolute inset-0 h-full w-full select-none object-cover transition-opacity ease-in-out"
                   style={{
                     opacity: activeImage === i ? 1 : 0,
-                    transform: activeImage === i ? 'scale(1.06)' : 'scale(1)',
-                    transitionDuration: `${TRANSITION_DURATION}ms, 4200ms`,
+                    transitionDuration: `${TRANSITION_DURATION}ms`,
                     zIndex: activeImage === i ? 1 : 0,
                   }}
                 />
