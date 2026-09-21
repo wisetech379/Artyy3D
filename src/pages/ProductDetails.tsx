@@ -10,13 +10,20 @@ import type { Product, Category } from '@/types';
 import { formatPrice } from '@/utils/format';
 import api from '@/utils/api';
 
+interface ApiProductImage {
+  id?: number | string;
+  Id?: number | string;
+  imageUrl?: string;
+  ImageUrl?: string;
+}
+
 interface ApiProductItem {
   id: number | string;
   name?: string;
   description?: string;
   category?: string;
   price?: number;
-  images?: string[];
+  images?: (ApiProductImage | string)[];
   imageUrl?: string;
   rating?: number;
   reviews?: number;
@@ -37,6 +44,15 @@ const AVAILABLE_COLORS = [
   { name: 'Navy', hex: '#0F172A', border: 'border-blue-900/40' },
   { name: 'Gray', hex: '#6B7280', border: 'border-gray-500/40' },
 ];
+
+// الباك بيرجع الصور كمصفوفة objects { id, imageUrl } دلوقتي بدل مصفوفة نصوص،
+// الدالة دي بتتعامل مع الحالتين (نص أو object) عشان الكود يفضل شغال في الحالتين
+function extractImageUrls(images: (ApiProductImage | string)[] | undefined, fallback?: string): string[] {
+  if (images && images.length > 0) {
+    return images.map((img) => (typeof img === 'string' ? img : img.imageUrl || img.ImageUrl || ''));
+  }
+  return fallback ? [fallback] : ['/img/placeholder.png'];
+}
 
 export default function ProductDetails() {
   const { id } = useParams<{ id: string }>();
@@ -62,7 +78,7 @@ export default function ProductDetails() {
           description: data.description ?? '',
           category: (data.category ?? 'Custom') as Category,
           price: Number(data.price ?? 0),
-          images: data.images && data.images.length ? data.images : data.imageUrl ? [data.imageUrl] : ['/img/placeholder.png'],
+          images: extractImageUrls(data.images, data.imageUrl),
           rating: Number(data.rating ?? 5),
           reviews: Number(data.reviews ?? 1),
           dimensions: data.dimensions ?? '',
@@ -73,6 +89,7 @@ export default function ProductDetails() {
         };
 
         setProduct(mapped);
+        setActiveImage(0);
         setSelectedColor(AVAILABLE_COLORS[0].name);
 
         const listRes = await api.get('/Products');
@@ -83,7 +100,7 @@ export default function ProductDetails() {
           description: item.description ?? '',
           category: (item.category ?? 'Custom') as Category,
           price: Number(item.price ?? 0),
-          images: item.images && item.images.length ? item.images : item.imageUrl ? [item.imageUrl] : ['/img/placeholder.png'],
+          images: extractImageUrls(item.images, item.imageUrl),
           rating: Number(item.rating ?? 5),
           reviews: Number(item.reviews ?? 1),
           dimensions: item.dimensions ?? '',
@@ -149,12 +166,12 @@ export default function ProductDetails() {
             </div>
           </Reveal>
           {product.images.length > 1 && (
-            <div className="mt-4 flex gap-3">
+            <div className="mt-4 flex gap-3 overflow-x-auto pb-1">
               {product.images.map((img, i) => (
                 <button
                   key={i}
                   onClick={() => setActiveImage(i)}
-                  className={`overflow-hidden rounded-lg border-2 transition-colors ${
+                  className={`overflow-hidden rounded-lg border-2 transition-colors flex-shrink-0 ${
                     activeImage === i ? 'border-ember' : 'border-transparent'
                   }`}
                 >

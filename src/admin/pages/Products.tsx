@@ -260,8 +260,13 @@ function ProductModal({ open, onClose, onSave, product, categories, saving }: Pr
   const [description, setDescription] = useState('');
   const [price, setPrice] = useState('');
   const [category, setCategory] = useState('');
-  const [imageFile, setImageFile] = useState<File | null>(null);
-  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+
+  // صور جديدة هترفعها
+  const [imageFiles, setImageFiles] = useState<File[]>([]);
+  const [newPreviewUrls, setNewPreviewUrls] = useState<string[]>([]);
+
+  // صور موجودة فعلاً على المنتج (وقت التعديل)
+  const [existingImages, setExistingImages] = useState<{ id: string; url: string }[]>([]);
 
   useEffect(() => {
     if (product) {
@@ -271,28 +276,49 @@ function ProductModal({ open, onClose, onSave, product, categories, saving }: Pr
       setPrice(pPrice !== undefined && pPrice !== null ? String(pPrice) : '');
       setCategory(product.category || product.Category || categories[0] || 'Home');
 
-      let rawImg = product.imageUrl || product.ImageUrl || product.image || null;
-      if (rawImg && !rawImg.startsWith('http') && !rawImg.startsWith('data:')) {
-        rawImg = `${BACKEND_URL}${rawImg.startsWith('/') ? '' : '/'}${rawImg}`;
-      }
-      setPreviewUrl(rawImg);
+      const imgs = product.images || product.Images || [];
+      const mapped = imgs.map((img: any) => {
+        let url = img.imageUrl || img.ImageUrl || img;
+        if (url && !url.startsWith('http') && !url.startsWith('data:')) {
+          url = `${BACKEND_URL}${url.startsWith('/') ? '' : '/'}${url}`;
+        }
+        return { id: String(img.id ?? img.Id ?? url), url };
+      });
+      setExistingImages(mapped);
     } else {
       setName('');
       setDescription('');
       setPrice('');
       setCategory(categories[0] || 'Home');
-      setImageFile(null);
-      setPreviewUrl(null);
+      setExistingImages([]);
     }
+    setImageFiles([]);
+    setNewPreviewUrls([]);
   }, [product, open, categories]);
 
   if (!open) return null;
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0] || null;
-    setImageFile(file);
-    if (file) {
-      setPreviewUrl(URL.createObjectURL(file));
+    const files = Array.from(e.target.files || []);
+    if (files.length === 0) return;
+    setImageFiles((prev) => [...prev, ...files]);
+    setNewPreviewUrls((prev) => [...prev, ...files.map((f) => URL.createObjectURL(f))]);
+    e.target.value = ''; // يسمح تختار نفس الملف تاني لو حبيت
+  };
+
+  const removeNewImage = (index: number) => {
+    setImageFiles((prev) => prev.filter((_, i) => i !== index));
+    setNewPreviewUrls((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  const removeExistingImage = async (imageId: string) => {
+    const productId = product?.id ?? product?.Id ?? product?._id;
+    if (!productId) return;
+    try {
+      await api.delete(`/products/${productId}/images/${imageId}`);
+      setExistingImages((prev) => prev.filter((img) => img.id !== imageId));
+    } catch (err) {
+      console.error('Error deleting image:', err);
     }
   };
 
@@ -305,9 +331,9 @@ function ProductModal({ open, onClose, onSave, product, categories, saving }: Pr
     data.append('price', price);
     data.append('category', category);
 
-    if (imageFile) {
-      data.append('image', imageFile);
-    }
+    imageFiles.forEach((file) => {
+      data.append('images', file); // لازم الاسم يبقى 'images' بالظبط
+    });
 
     const productId = product?.id ?? product?.Id ?? product?._id;
     onSave(data, productId ? String(productId) : undefined);
@@ -316,7 +342,7 @@ function ProductModal({ open, onClose, onSave, product, categories, saving }: Pr
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-2 sm:p-4 backdrop-blur-sm overflow-y-auto">
       <div className="w-full max-w-lg rounded-2xl border border-white/10 bg-neutral-900 text-white shadow-2xl my-auto flex flex-col max-h-[92vh]">
-        
+
         {/* Header */}
         <div className="flex items-center justify-between border-b border-white/10 p-4 sm:p-6 pb-4">
           <h3 className="text-lg font-bold text-white">
@@ -396,36 +422,59 @@ function ProductModal({ open, onClose, onSave, product, categories, saving }: Pr
 
           <div>
             <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-neutral-400">
-              Product Image
+              Product Images
             </label>
-            <div className="flex items-center gap-3">
-              <label className="flex cursor-pointer items-center justify-center gap-2 rounded-xl border border-white/10 bg-neutral-800 px-4 py-2 text-xs font-semibold text-neutral-200 shadow-sm transition hover:border-orange-500/50 hover:bg-orange-500/10 hover:text-orange-400 active:scale-95">
-                <Upload size={14} className="text-orange-400" />
-                <span>Choose File</span>
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={handleFileChange}
-                  className="hidden"
-                />
-              </label>
-              <span className="max-w-[220px] truncate text-xs text-neutral-400">
-                {imageFile ? imageFile.name : 'No file chosen'}
-              </span>
-            </div>
+            <label className="flex w-fit cursor-pointer items-center justify-center gap-2 rounded-xl border border-white/10 bg-neutral-800 px-4 py-2 text-xs font-semibold text-neutral-200 shadow-sm transition hover:border-orange-500/50 hover:bg-orange-500/10 hover:text-orange-400 active:scale-95">
+              <Upload size={14} className="text-orange-400" />
+              <span>Choose Images</span>
+              <input
+                type="file"
+                accept="image/*"
+                multiple
+                onChange={handleFileChange}
+                className="hidden"
+              />
+            </label>
 
-            {previewUrl && (
-              <div className="mt-3 flex items-center gap-3">
-                <img
-                  src={previewUrl}
-                  alt="Preview"
-                  className="h-16 w-16 rounded-xl border border-white/10 bg-neutral-800 object-cover shadow-sm"
-                />
-                <span className="text-xs text-neutral-400">Image selected</span>
+            {/* سكرول أفقي فيه الصور الموجودة + الجديدة */}
+            {(existingImages.length > 0 || newPreviewUrls.length > 0) && (
+              <div className="mt-3 flex gap-3 overflow-x-auto pb-2">
+                {existingImages.map((img) => (
+                  <div key={img.id} className="relative flex-shrink-0">
+                    <img
+                      src={img.url}
+                      alt="Existing"
+                      className="h-20 w-20 rounded-xl border border-white/10 bg-neutral-800 object-cover"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => removeExistingImage(img.id)}
+                      className="absolute -right-1.5 -top-1.5 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-[10px] text-white shadow"
+                    >
+                      ✕
+                    </button>
+                  </div>
+                ))}
+                {newPreviewUrls.map((url, i) => (
+                  <div key={`new-${i}`} className="relative flex-shrink-0">
+                    <img
+                      src={url}
+                      alt="New"
+                      className="h-20 w-20 rounded-xl border border-orange-500/50 bg-neutral-800 object-cover"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => removeNewImage(i)}
+                      className="absolute -right-1.5 -top-1.5 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-[10px] text-white shadow"
+                    >
+                      ✕
+                    </button>
+                  </div>
+                ))}
               </div>
             )}
           </div>
-          
+
           {/* Footer Actions */}
           <div className="flex items-center justify-end gap-3 border-t border-white/10 pt-4 mt-6">
             <button
