@@ -24,7 +24,7 @@ const AdminApp = lazy(() => import('@/admin/App'));
 const Maintenance = lazy(() => import('@/pages/Maintenance'));
 
 // شغّل/أوقف وضع الصيانة من هنا فقط: غيّر VITE_MAINTENANCE_MODE في Vercel Environment Variables لـ "true" أو "false"
-const isMaintenanceMode = import.meta.env.VITE_MAINTENANCE_MODE === 'true';
+const isMaintenanceMode = import.meta.env.VITE_MAINTENANCE_MODE === 'false';
 
 function PageLoader() {
   return (
