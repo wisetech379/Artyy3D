@@ -7,6 +7,7 @@ import { ToastProvider } from '@/context/ToastContext';
 import { Layout } from '@/components/Layout';
 import { ProtectedRoute } from '@/components/ProtectedRoute';
 
+
 const Home = lazy(() => import('@/pages/Home'));
 const About = lazy(() => import('@/pages/About'));
 const Services = lazy(() => import('@/pages/Services'));
@@ -20,6 +21,10 @@ const OrderSuccess = lazy(() => import('@/pages/OrderSuccess'));
 const MyOrders = lazy(() => import('@/pages/MyOrders'));
 const NotFound = lazy(() => import('@/pages/NotFound'));
 const AdminApp = lazy(() => import('@/admin/App'));
+const Maintenance = lazy(() => import('@/pages/Maintenance'));
+
+// شغّل/أوقف وضع الصيانة من هنا فقط: غيّر VITE_MAINTENANCE_MODE في Vercel Environment Variables لـ "true" أو "false"
+const isMaintenanceMode = import.meta.env.VITE_MAINTENANCE_MODE === 'true';
 
 function PageLoader() {
   return (
@@ -48,35 +53,48 @@ export default function App() {
       <AuthProvider>
         <ToastProvider>
           <CartProvider>
-            <Layout>
+            {isMaintenanceMode ? (
+              // وضع الصيانة شغال: كل حاجة تتحول لصفحة الصيانة إلا لوحة الأدمن (/admin) عشان تقدر تدير الموقع عادي
               <Suspense fallback={<PageLoader />}>
                 <Routes>
-                  {/* Public Routes */}
-                  <Route path="/" element={<Home />} />
-                  <Route path="/about" element={<About />} />
-                  <Route path="/services" element={<Services />} />
-                  <Route path="/products" element={<Products />} />
-                  <Route path="/products/:id" element={<ProductDetails />} />
-                  <Route path="/login" element={<Login />} />
-                  <Route path="/register" element={<Register />} />
-                  <Route path="/forgot-password" element={<ForgotPassword />} />
-                  <Route path="/order-success" element={<OrderSuccess />} />
-
-                  {/* Protected User Routes */}
-                  <Route element={<ProtectedRoute />}>
-                    <Route path="/checkout" element={<Checkout />} />
-                    <Route path="/my-orders" element={<MyOrders />} />
-                  </Route>
-
-                  {/* Protected Admin Routes */}
                   <Route element={<ProtectedRoute requiredRole="Admin" />}>
                     <Route path="/admin/*" element={<AdminApp />} />
                   </Route>
-
-                  <Route path="*" element={<NotFound />} />
+                  <Route path="/login" element={<Login />} />
+                  <Route path="*" element={<Maintenance />} />
                 </Routes>
               </Suspense>
-            </Layout>
+            ) : (
+              <Layout>
+                <Suspense fallback={<PageLoader />}>
+                  <Routes>
+                    {/* Public Routes */}
+                    <Route path="/" element={<Home />} />
+                    <Route path="/about" element={<About />} />
+                    <Route path="/services" element={<Services />} />
+                    <Route path="/products" element={<Products />} />
+                    <Route path="/products/:id" element={<ProductDetails />} />
+                    <Route path="/login" element={<Login />} />
+                    <Route path="/register" element={<Register />} />
+                    <Route path="/forgot-password" element={<ForgotPassword />} />
+                    <Route path="/order-success" element={<OrderSuccess />} />
+
+                    {/* Protected User Routes */}
+                    <Route element={<ProtectedRoute />}>
+                      <Route path="/checkout" element={<Checkout />} />
+                      <Route path="/my-orders" element={<MyOrders />} />
+                    </Route>
+
+                    {/* Protected Admin Routes */}
+                    <Route element={<ProtectedRoute requiredRole="Admin" />}>
+                      <Route path="/admin/*" element={<AdminApp />} />
+                    </Route>
+
+                    <Route path="*" element={<NotFound />} />
+                  </Routes>
+                </Suspense>
+              </Layout>
+            )}
           </CartProvider>
         </ToastProvider>
       </AuthProvider>
