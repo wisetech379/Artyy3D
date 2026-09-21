@@ -83,7 +83,7 @@ export default function Home() {
             </Reveal>
             <Reveal delay={100}>
               <h1 className="mt-6 text-4xl font-bold leading-[1.05] tracking-tight text-white sm:text-6xl lg:text-7xl text-balance">
-                Bring Your Ideas to Life with <span className="text-yellow-500 ">3D Print</span>
+                Bring Your Ideas to Life with <span className="text-yellow-500">3D Print</span>
               </h1>
             </Reveal>
             <Reveal delay={200}>
@@ -93,13 +93,14 @@ export default function Home() {
             </Reveal>
             <Reveal delay={300}>
               <div className="mt-10 flex flex-col items-center justify-center gap-3 sm:flex-row">
-                <Link
-                  to="/products"
-                  className="group flex items-center gap-2 rounded-full bg-yellow-500 px-7 py-3.5 text-sm font-semibold text-white transition-all hover:scale-105 hover:bg-orange-500"
+                {/* تم تعديل هذا الزر ليفتح نافذة Custom Order مباشرة */}
+                <button
+                  onClick={() => setCustomOpen(true)}
+                  className="group flex items-center gap-2 rounded-full bg-yellow-500 px-7 py-3.5 text-sm font-semibold text-white transition-all hover:scale-105 hover:bg-orange-500 cursor-pointer"
                 >
                   Start Your Order
                   <ArrowRight size={16} className="transition-transform group-hover:translate-x-1" />
-                </Link>
+                </button>
                 <Link
                   to="/products"
                   className="rounded-full border border-white/15 px-7 py-3.5 text-sm font-semibold text-white transition-all hover:border-white/40 hover:bg-white/5"
@@ -131,7 +132,7 @@ export default function Home() {
         <div className="mt-10 text-center">
           <Link
             to="/products"
-            className="inline-flex items-center gap-2 text-xl font-semibold text-yellow-500  transition-colors hover:text-ember"
+            className="inline-flex items-center gap-2 text-xl font-semibold text-yellow-500 transition-colors hover:text-ember"
           >
             View all products <ArrowRight size={15} />
           </Link>
@@ -231,7 +232,7 @@ export default function Home() {
             <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
               <button
                 onClick={() => setCustomOpen(true)}
-                className="rounded-full bg-yellow-500  px-7 py-3.5 text-sm font-semibold text-white transition-all hover:scale-105 hover:bg-orange-500"
+                className="rounded-full bg-yellow-500 px-7 py-3.5 text-sm font-semibold text-white transition-all hover:scale-105 hover:bg-orange-500 cursor-pointer"
               >
                 Create Custom Order
               </button>

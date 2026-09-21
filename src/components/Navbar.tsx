@@ -37,7 +37,7 @@ export function Navbar() {
 
   return (
     <>
-      <header className="sticky top-0 z-50 border-b border-white/5 bg-gray-100 ">
+      <header className="sticky top-0 z-50 border-b border-white/5 bg-gray-100">
         <nav className="mx-auto flex h-16 max-w-8xl items-center justify-between px-4 sm:px-6 lg:px-8">
           <div className="flex items-center gap-8">
             <Logo />
@@ -83,7 +83,6 @@ export function Navbar() {
             {/* Auth Actions - Desktop */}
             {isAuthenticated ? (
               <div className="hidden items-center gap-2 sm:flex">
-                {/* رابط Dashboard للأدمن فقط */}
                 {user?.role === 'Admin' && (
                   <Link
                     to="/admin"
@@ -94,7 +93,6 @@ export function Navbar() {
                   </Link>
                 )}
 
-                {/* رابط طلباتي للعميل المسجل */}
                 <Link
                   to="/my-orders"
                   className="flex items-center gap-1.5 rounded-lg border border-white/10 bg-white/5 px-3 py-1.5 text-sm font-medium text-neutral-300 transition-all hover:border-ember/40 hover:bg-white/10 hover:text-white"
@@ -165,14 +163,18 @@ export function Navbar() {
       {mobileOpen && (
         <div className="fixed inset-0 z-40 lg:hidden">
           <div className="absolute inset-0 bg-ink/60 backdrop-blur-sm" onClick={() => setMobileOpen(false)} />
-          <div className="absolute right-0 top-0 h-full w-72 max-w-[80vw] animate-slide-in-right border-l border-white/10 bg-surface p-6">
-            <div className="flex items-center justify-between">
-              <Logo />
-              <button onClick={() => setMobileOpen(false)} aria-label="Close menu">
-                <X size={22} className="text-white/60" />
+          
+          {/* تم تعديل الـ padding العلوي هنا ليكون pt-20 عشان الكلام ينزل تحت اللوجو والهيدر */}
+          <div className="absolute right-0 top-0 h-full w-72 max-w-[80vw] animate-slide-in-right border-l border-white/10 bg-surface px-6 pt-20 pb-6 overflow-y-auto">
+            
+            {/* زر الإغلاق العلوي */}
+            <div className="absolute top-5 right-5 z-10">
+              <button onClick={() => setMobileOpen(false)} aria-label="Close menu" className="p-1 rounded-lg bg-white/5 text-white/80 hover:text-white">
+                <X size={22} />
               </button>
             </div>
-            <div className="mt-8 flex flex-col gap-1">
+
+            <div className="flex flex-col gap-1">
               {navLinks.map((link) => (
                 <NavLink
                   key={link.to}
@@ -238,7 +240,7 @@ export function Navbar() {
               <Link
                 to="/products"
                 onClick={() => setMobileOpen(false)}
-                className="rounded-full bg-yellow-500  px-5 py-3 text-center text-sm font-semibold text-white"
+                className="rounded-full bg-yellow-500 px-5 py-3 text-center text-sm font-semibold text-white shadow-md"
               >
                 Shop Now
               </Link>
@@ -248,4 +250,4 @@ export function Navbar() {
       )}
     </>
   );
-} 
+}
