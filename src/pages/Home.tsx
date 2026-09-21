@@ -95,7 +95,7 @@ export default function Home() {
               <div className="mt-10 flex flex-col items-center justify-center gap-3 sm:flex-row">
                 <Link
                   to="/products"
-                  className="rounded-full border border-white/15 px-7 py-3.5 text-sm font-semibold text-white transition-all hover:border-white/40 hover:bg-white/5"
+                  className=" bg-black rounded-full border border-white/15 px-7 py-3.5 text-sm font-semibold text-yellow-500 transition-all hover:border-white/40 "
                 >
                   Start Your Order
                 </Link>
