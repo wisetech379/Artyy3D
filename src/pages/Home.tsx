@@ -92,16 +92,19 @@ export default function Home() {
               </p>
             </Reveal>
             <Reveal delay={300}>
-              <div className="mt-10 flex flex-col items-center justify-center gap-3 sm:flex-row">
+         <div className="mt-10 flex flex-col items-center justify-center gap-3 sm:flex-row">
+                {/* زرار Start Your Order (على الشمال - أصفر بارز) */}
                 <Link
                   to="/products"
-                  className=" bg-black rounded-full border  px-7 py-3.5 text-sm font-semibold text-yellow-500 transition-all hover:scale-105 hover:bg-yellow-500 hover:text-black cursor-pointer"
+                  className="rounded-full bg-yellow-500 px-7 py-3.5 text-sm font-semibold text-white transition-all hover:scale-105 hover:bg-orange-500 cursor-pointer"
                 >
                   Start Your Order
                 </Link>
+
+                {/* زرار Create Custom Order (على اليمين - أسود مع حدود وألوان متناسقة) */}
                 <button
                   onClick={() => setCustomOpen(true)}
-                  className="rounded-full bg-yellow-500 px-7 py-3.5 text-sm font-semibold text-white transition-all hover:scale-105 hover:bg-orange-500 cursor-pointer"
+                  className="rounded-full bg-black border border-yellow-500/30 px-7 py-3.5 text-sm font-semibold text-yellow-500 transition-all hover:scale-105 hover:bg-yellow-500 hover:text-black cursor-pointer"
                 >
                   Create Custom Order
                 </button>
