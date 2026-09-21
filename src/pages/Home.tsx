@@ -93,14 +93,14 @@ export default function Home() {
             </Reveal>
             <Reveal delay={300}>
               <div className="mt-10 flex flex-col items-center justify-center gap-3 sm:flex-row">
-                {/* تم تعديل هذا الزر ليفتح نافذة Custom Order مباشرة */}
+                {/* زرار الـ Custom Order الرئيسي في الهيرو بنفس ستايل زرار تحت */}
                 <button
                   onClick={() => setCustomOpen(true)}
-                  className="group flex items-center gap-2 rounded-full bg-yellow-500 px-7 py-3.5 text-sm font-semibold text-white transition-all hover:scale-105 hover:bg-orange-500 cursor-pointer"
+                  className="rounded-full bg-yellow-500 px-7 py-3.5 text-sm font-semibold text-white transition-all hover:scale-105 hover:bg-orange-500 cursor-pointer"
                 >
-                  Start Your Order
-                  <ArrowRight size={16} className="transition-transform group-hover:translate-x-1" />
+                  Create Custom Order
                 </button>
+                {/* زرار الـ Explore Products */}
                 <Link
                   to="/products"
                   className="rounded-full border border-white/15 px-7 py-3.5 text-sm font-semibold text-white transition-all hover:border-white/40 hover:bg-white/5"
