@@ -55,6 +55,7 @@ function extractImageUrls(images: (ApiProductImage | string)[] | undefined, fall
 }
 
 const AUTO_SLIDE_INTERVAL = 4000; // 4 ثواني
+const TRANSITION_DURATION = 700; // مللي ثانية
 
 export default function ProductDetails() {
   const { id } = useParams<{ id: string }>();
@@ -211,18 +212,28 @@ export default function ProductDetails() {
         <div>
           <Reveal>
             <div
-              className="group relative overflow-hidden rounded-2xl border border-white/5 bg-surface"
+              className="group relative aspect-square w-full overflow-hidden rounded-2xl border border-white/5 bg-surface"
               onMouseEnter={() => setIsHovering(true)}
               onMouseLeave={() => setIsHovering(false)}
               onTouchStart={handleTouchStart}
               onTouchEnd={handleTouchEnd}
             >
-              <img
-                src={product.images[activeImage]}
-                alt={product.name}
-                className="aspect-square w-full object-cover select-none"
-                draggable={false}
-              />
+              {/* كل الصور متراكبة فوق بعض، وبس اللي شغالة دلوقتي ظاهرة - ده اللي بيدي الـ crossfade الناعم */}
+              {product.images.map((img, i) => (
+                <img
+                  key={img + i}
+                  src={img}
+                  alt={`${product.name} ${i + 1}`}
+                  draggable={false}
+                  className="absolute inset-0 h-full w-full select-none object-cover transition-[opacity,transform] ease-in-out"
+                  style={{
+                    opacity: activeImage === i ? 1 : 0,
+                    transform: activeImage === i ? 'scale(1.06)' : 'scale(1)',
+                    transitionDuration: `${TRANSITION_DURATION}ms, 4200ms`,
+                    zIndex: activeImage === i ? 1 : 0,
+                  }}
+                />
+              ))}
 
               {product.images.length > 1 && (
                 <>
@@ -230,7 +241,7 @@ export default function ProductDetails() {
                     type="button"
                     onClick={goToPrevImage}
                     aria-label="Previous image"
-                    className="absolute left-3 top-1/2 -translate-y-1/2 flex h-10 w-10 items-center justify-center rounded-full bg-black/50 text-white opacity-0 backdrop-blur-sm transition-opacity duration-200 hover:bg-black/70 group-hover:opacity-100 focus:opacity-100"
+                    className="absolute left-3 top-1/2 z-10 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-black/50 text-white opacity-0 backdrop-blur-sm transition-all duration-200 hover:bg-black/70 hover:scale-110 group-hover:opacity-100 focus:opacity-100"
                   >
                     <ChevronLeft size={22} />
                   </button>
@@ -238,17 +249,19 @@ export default function ProductDetails() {
                     type="button"
                     onClick={goToNextImage}
                     aria-label="Next image"
-                    className="absolute right-3 top-1/2 -translate-y-1/2 flex h-10 w-10 items-center justify-center rounded-full bg-black/50 text-white opacity-0 backdrop-blur-sm transition-opacity duration-200 hover:bg-black/70 group-hover:opacity-100 focus:opacity-100"
+                    className="absolute right-3 top-1/2 z-10 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-black/50 text-white opacity-0 backdrop-blur-sm transition-all duration-200 hover:bg-black/70 hover:scale-110 group-hover:opacity-100 focus:opacity-100"
                   >
                     <ChevronRight size={22} />
                   </button>
 
-                  <div className="absolute bottom-3 left-1/2 flex -translate-x-1/2 gap-1.5">
+                  <div className="absolute bottom-3 left-1/2 z-10 flex -translate-x-1/2 gap-1.5">
                     {product.images.map((_, i) => (
-                      <span
+                      <button
                         key={i}
-                        className={`h-1.5 rounded-full transition-all duration-200 ${
-                          activeImage === i ? 'w-4 bg-ember' : 'w-1.5 bg-white/40'
+                        onClick={() => setActiveImage(i)}
+                        aria-label={`Go to image ${i + 1}`}
+                        className={`h-1.5 rounded-full transition-all duration-500 ease-out ${
+                          activeImage === i ? 'w-5 bg-ember' : 'w-1.5 bg-white/40 hover:bg-white/70'
                         }`}
                       />
                     ))}
@@ -264,8 +277,8 @@ export default function ProductDetails() {
                 <button
                   key={i}
                   onClick={() => setActiveImage(i)}
-                  className={`flex-shrink-0 overflow-hidden rounded-md border-2 transition-colors ${
-                    activeImage === i ? 'border-ember' : 'border-transparent opacity-70 hover:opacity-100'
+                  className={`flex-shrink-0 overflow-hidden rounded-md border-2 transition-all duration-300 ${
+                    activeImage === i ? 'border-ember opacity-100' : 'border-transparent opacity-60 hover:opacity-100'
                   }`}
                 >
                   <img src={img} alt={`${product.name} ${i + 1}`} className="h-12 w-12 object-cover" />
