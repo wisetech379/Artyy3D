@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Minus, Plus, ShoppingBag, Zap } from 'lucide-react';
+import { ArrowLeft, Minus, Plus, ShoppingBag, Zap, ChevronLeft, ChevronRight } from 'lucide-react';
 import { toast } from 'sonner';
 import { useSEO } from '@/hooks/useSEO';
 import { Reveal, StarRating } from '@/components/ui';
@@ -54,6 +54,8 @@ function extractImageUrls(images: (ApiProductImage | string)[] | undefined, fall
   return fallback ? [fallback] : ['/img/placeholder.png'];
 }
 
+const AUTO_SLIDE_INTERVAL = 4000; // 4 ثواني
+
 export default function ProductDetails() {
   const { id } = useParams<{ id: string }>();
   const [product, setProduct] = useState<Product | null>(null);
@@ -63,6 +65,9 @@ export default function ProductDetails() {
   const [activeImage, setActiveImage] = useState(0);
   const [quantity, setQuantity] = useState(1);
   const [selectedColor, setSelectedColor] = useState<string>('White');
+  const [isHovering, setIsHovering] = useState(false);
+  const [touchStart, setTouchStart] = useState<number | null>(null);
+  const autoSlideRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   useEffect(() => {
     if (!id) return;
@@ -120,6 +125,23 @@ export default function ProductDetails() {
     load();
   }, [id]);
 
+  // Auto-slide: بيتحرك تلقائيًا كل 4 ثواني، ويتوقف لو المستخدم بيعمل hover أو لو صورة واحدة بس
+  useEffect(() => {
+    if (!product || product.images.length <= 1 || isHovering) {
+      return;
+    }
+
+    autoSlideRef.current = setInterval(() => {
+      setActiveImage((prev) => (prev === product.images.length - 1 ? 0 : prev + 1));
+    }, AUTO_SLIDE_INTERVAL);
+
+    return () => {
+      if (autoSlideRef.current) {
+        clearInterval(autoSlideRef.current);
+      }
+    };
+  }, [product, isHovering]);
+
   useSEO({
     title: product ? `3Print | ${product.name}` : '3Print | Product',
     description: product?.description,
@@ -135,6 +157,33 @@ export default function ProductDetails() {
       </div>
     );
   }
+
+  const goToPrevImage = () => {
+    setActiveImage((prev) => (prev === 0 ? product.images.length - 1 : prev - 1));
+  };
+
+  const goToNextImage = () => {
+    setActiveImage((prev) => (prev === product.images.length - 1 ? 0 : prev + 1));
+  };
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    setTouchStart(e.touches[0].clientX);
+  };
+
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    if (touchStart === null) return;
+    const touchEnd = e.changedTouches[0].clientX;
+    const diff = touchStart - touchEnd;
+
+    if (Math.abs(diff) > 50) {
+      if (diff > 0) {
+        goToNextImage();
+      } else {
+        goToPrevImage();
+      }
+    }
+    setTouchStart(null);
+  };
 
   const handleAdd = () => {
     add(product, quantity, undefined, selectedColor);
@@ -161,21 +210,65 @@ export default function ProductDetails() {
       <div className="grid gap-12 lg:grid-cols-2">
         <div>
           <Reveal>
-            <div className="overflow-hidden rounded-2xl border border-white/5 bg-surface">
-              <img src={product.images[activeImage]} alt={product.name} className="aspect-square w-full object-cover" />
+            <div
+              className="group relative overflow-hidden rounded-2xl border border-white/5 bg-surface"
+              onMouseEnter={() => setIsHovering(true)}
+              onMouseLeave={() => setIsHovering(false)}
+              onTouchStart={handleTouchStart}
+              onTouchEnd={handleTouchEnd}
+            >
+              <img
+                src={product.images[activeImage]}
+                alt={product.name}
+                className="aspect-square w-full object-cover select-none"
+                draggable={false}
+              />
+
+              {product.images.length > 1 && (
+                <>
+                  <button
+                    type="button"
+                    onClick={goToPrevImage}
+                    aria-label="Previous image"
+                    className="absolute left-3 top-1/2 -translate-y-1/2 flex h-10 w-10 items-center justify-center rounded-full bg-black/50 text-white opacity-0 backdrop-blur-sm transition-opacity duration-200 hover:bg-black/70 group-hover:opacity-100 focus:opacity-100"
+                  >
+                    <ChevronLeft size={22} />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={goToNextImage}
+                    aria-label="Next image"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 flex h-10 w-10 items-center justify-center rounded-full bg-black/50 text-white opacity-0 backdrop-blur-sm transition-opacity duration-200 hover:bg-black/70 group-hover:opacity-100 focus:opacity-100"
+                  >
+                    <ChevronRight size={22} />
+                  </button>
+
+                  <div className="absolute bottom-3 left-1/2 flex -translate-x-1/2 gap-1.5">
+                    {product.images.map((_, i) => (
+                      <span
+                        key={i}
+                        className={`h-1.5 rounded-full transition-all duration-200 ${
+                          activeImage === i ? 'w-4 bg-ember' : 'w-1.5 bg-white/40'
+                        }`}
+                      />
+                    ))}
+                  </div>
+                </>
+              )}
             </div>
           </Reveal>
+
           {product.images.length > 1 && (
-            <div className="mt-4 flex gap-3 overflow-x-auto pb-1">
+            <div className="mt-3 flex gap-2 overflow-x-auto pb-1">
               {product.images.map((img, i) => (
                 <button
                   key={i}
                   onClick={() => setActiveImage(i)}
-                  className={`overflow-hidden rounded-lg border-2 transition-colors flex-shrink-0 ${
-                    activeImage === i ? 'border-ember' : 'border-transparent'
+                  className={`flex-shrink-0 overflow-hidden rounded-md border-2 transition-colors ${
+                    activeImage === i ? 'border-ember' : 'border-transparent opacity-70 hover:opacity-100'
                   }`}
                 >
-                  <img src={img} alt={`${product.name} ${i + 1}`} className="h-20 w-20 object-cover" />
+                  <img src={img} alt={`${product.name} ${i + 1}`} className="h-12 w-12 object-cover" />
                 </button>
               ))}
             </div>
