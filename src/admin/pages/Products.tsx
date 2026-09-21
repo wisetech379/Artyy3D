@@ -5,7 +5,7 @@ import ConfirmDialog from '../components/ConfirmDialog';
 import { Plus, Search, Trash2, Edit, Upload } from 'lucide-react';
 import api from '../../utils/api';
 
-const ALL_CATEGORIES = ['Home', 'Makeup', 'Doctors', 'Cars', 'Graduation Projects'];
+const ALL_CATEGORIES = ['Home', 'Makeup', 'Doctors', 'Cars', 'Graduation Projects', 'Phone Accessories', 'Kitchen', 'Holder'];
 const BACKEND_URL = 'https://grateful-elegance-production-8692.up.railway.app';
 
 export default function ProductsPage() {
@@ -268,6 +268,9 @@ function ProductModal({ open, onClose, onSave, product, categories, saving }: Pr
   // صور موجودة فعلاً على المنتج (وقت التعديل)
   const [existingImages, setExistingImages] = useState<{ id: string; url: string }[]>([]);
 
+  // جديد: تتبع أخطاء الفورم قبل الحفظ
+  const [errors, setErrors] = useState<{ [key: string]: string }>({});
+
   useEffect(() => {
     if (product) {
       setName(product.name || product.Name || '');
@@ -294,6 +297,7 @@ function ProductModal({ open, onClose, onSave, product, categories, saving }: Pr
     }
     setImageFiles([]);
     setNewPreviewUrls([]);
+    setErrors({});
   }, [product, open, categories]);
 
   if (!open) return null;
@@ -322,13 +326,33 @@ function ProductModal({ open, onClose, onSave, product, categories, saving }: Pr
     }
   };
 
+  // جديد: تحقق بسيط قبل الحفظ
+  const validate = () => {
+    const newErrors: { [key: string]: string } = {};
+
+    if (!name.trim()) {
+      newErrors.name = 'اسم المنتج مطلوب';
+    }
+    if (price === '' || isNaN(Number(price)) || Number(price) < 0) {
+      newErrors.price = 'السعر لازم يكون رقم صحيح';
+    }
+    if (!category) {
+      newErrors.category = 'اختار تصنيف';
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (!validate()) return;
 
     const data = new FormData();
     data.append('name', name);
     data.append('description', description);
-    data.append('price', price);
+    data.append('price', String(Number(price))); // جديد: نتأكد إنه رقم قبل ما يتبعت
     data.append('category', category);
 
     imageFiles.forEach((file) => {
@@ -370,8 +394,11 @@ function ProductModal({ open, onClose, onSave, product, categories, saving }: Pr
               placeholder="e.g., Graduation Trophy Design"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              className="w-full rounded-xl border border-white/10 bg-black/30 p-3 text-sm text-white placeholder:text-neutral-600 outline-none transition-colors focus:border-orange-500"
+              className={`w-full rounded-xl border bg-black/30 p-3 text-sm text-white placeholder:text-neutral-600 outline-none transition-colors ${
+                errors.name ? 'border-red-500' : 'border-white/10 focus:border-orange-500'
+              }`}
             />
+            {errors.name && <p className="mt-1 text-xs text-red-500">{errors.name}</p>}
           </div>
 
           <div>
@@ -395,12 +422,16 @@ function ProductModal({ open, onClose, onSave, product, categories, saving }: Pr
               <input
                 type="number"
                 step="0.01"
+                min="0"
                 required
                 placeholder="0.00"
                 value={price}
                 onChange={(e) => setPrice(e.target.value)}
-                className="w-full rounded-xl border border-white/10 bg-black/30 p-3 text-sm text-white placeholder:text-neutral-600 outline-none transition-colors focus:border-orange-500"
+                className={`w-full rounded-xl border bg-black/30 p-3 text-sm text-white placeholder:text-neutral-600 outline-none transition-colors ${
+                  errors.price ? 'border-red-500' : 'border-white/10 focus:border-orange-500'
+                }`}
               />
+              {errors.price && <p className="mt-1 text-xs text-red-500">{errors.price}</p>}
             </div>
             <div>
               <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-neutral-400">
@@ -409,7 +440,9 @@ function ProductModal({ open, onClose, onSave, product, categories, saving }: Pr
               <select
                 value={category}
                 onChange={(e) => setCategory(e.target.value)}
-                className="w-full rounded-xl border border-white/10 bg-black/30 p-3 text-sm text-white outline-none transition-colors focus:border-orange-500 cursor-pointer"
+                className={`w-full rounded-xl border bg-black/30 p-3 text-sm text-white outline-none transition-colors cursor-pointer ${
+                  errors.category ? 'border-red-500' : 'border-white/10 focus:border-orange-500'
+                }`}
               >
                 {categories.map((c) => (
                   <option key={c} value={c} className="bg-neutral-900 text-white">
@@ -417,6 +450,7 @@ function ProductModal({ open, onClose, onSave, product, categories, saving }: Pr
                   </option>
                 ))}
               </select>
+              {errors.category && <p className="mt-1 text-xs text-red-500">{errors.category}</p>}
             </div>
           </div>
 
@@ -498,4 +532,4 @@ function ProductModal({ open, onClose, onSave, product, categories, saving }: Pr
       </div>
     </div>
   );
-}
+}   

@@ -126,12 +126,42 @@ export const products: Product[] = [
     sizes: [],
     stock: 25,
   },
+  {
+    id: 'phone-stand-pro',
+    name: 'Ergonomic Phone Stand',
+    description: 'A sleek, 3D-printed desktop phone stand designed for optimal viewing angles.',
+    category: 'Phone Accessories',
+    price: 15.99,
+    images: [`https://images.pexels.com/photos/11134290/pexels-photo-11134290.jpeg?auto=compress&cs=tinysrgb&w=900`],
+    rating: 4.9,
+    reviews: 45,
+    dimensions: '10 × 8 × 9 cm',
+    colors: ['Matte Black', 'Silver', 'White'],
+    sizes: [],
+    stock: 20,
+    featured: true,
+  },
+  {
+    id: 'modern-kitchen-organizer',
+    name: 'Modular Spice & Utensil Holder',
+    description: 'Keep your kitchen counters neat with a custom-designed 3D-printed organizer.',
+    category: 'Kitchen',
+    price: 32.0,
+    images: [`https://images.pexels.com/photos/10726947/pexels-photo-10726947.jpeg?auto=compress&cs=tinysrgb&w=900`],
+    rating: 4.8,
+    reviews: 38,
+    dimensions: '25 × 12 × 10 cm',
+    colors: ['White', 'Slate Gray', 'Beige'],
+    sizes: [],
+    stock: 18,
+    featured: true,
+  },
 ];
 
-export const categories = ['All', 'Home', 'Makeup', 'Doctors', 'Cars'] as const;
+export const categories = ['All', 'Home', 'Makeup', 'Doctors', 'Cars', 'Phone Accessories', 'Kitchen'] as const;
 
 export const services: Service[] = [
-  {
+  { 
     title: 'Custom 3D Printing',
     description: 'Bring your 3D model, sketch, or design idea. We print it with high accuracy.',
     icon: 'Box',
