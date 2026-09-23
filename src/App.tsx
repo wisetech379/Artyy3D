@@ -1,12 +1,13 @@
 import { lazy, Suspense } from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { Toaster } from 'sonner';
+import { Analytics } from '@vercel/analytics/react';
+
 import { AuthProvider } from '@/context/AuthContext';
 import { CartProvider } from '@/context/CartContext';
 import { ToastProvider } from '@/context/ToastContext';
 import { Layout } from '@/components/Layout';
 import { ProtectedRoute } from '@/components/ProtectedRoute';
-
 
 const Home = lazy(() => import('@/pages/Home'));
 const About = lazy(() => import('@/pages/About'));
@@ -26,6 +27,7 @@ const Maintenance = lazy(() => import('@/pages/Maintenance'));
 // شغّل/أوقف وضع الصيانة من هنا فقط: غيّر VITE_MAINTENANCE_MODE في Vercel Environment Variables لـ "true" أو "false"
 const isMaintenanceMode = import.meta.env.VITE_MAINTENANCE_MODE === 'true';
 console.log('Maintenance Mode:', import.meta.env.VITE_MAINTENANCE_MODE);
+
 function PageLoader() {
   return (
     <div className="flex min-h-[60vh] items-center justify-center">
@@ -37,6 +39,9 @@ function PageLoader() {
 export default function App() {
   return (
     <BrowserRouter>
+      {/* Vercel Analytics Integration */}
+      <Analytics />
+
       {/* Toast Notifications Container */}
       <Toaster
         position="top-right"

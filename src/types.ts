@@ -1,4 +1,4 @@
-export type Category = 'Home' | 'Makeup' | 'Doctors' | 'Cars' | 'Graduation Projects';
+export type Category = 'Home' | 'Makeup' | 'Doctors' | 'Cars' | 'Phone Accessories' | 'Kitchen' | 'Graduation Projects';
 
 export interface Product {
   id: string;
