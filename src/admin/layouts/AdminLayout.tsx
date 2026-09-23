@@ -48,12 +48,22 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const poll = useCallback(async () => {
     try {
       if (!initializedRef.current) {
-        const res = await api.get<{ latestId: number }>('/Orders/latest-id');
-        lastSeenIdRef.current = res.data.latestId;
-        localStorage.setItem(STORAGE_KEY, String(res.data.latestId));
         initializedRef.current = true;
-        return;
+
+        // لو مفيش قيمة متخزنة قبل كده، ده معناه أول مرة فعلاً بيتشغل فيها النظام
+        // في الحالة دي بس نعمل "تصفير" ونجيب آخر Id موجود عشان منبعتش إشعارات
+        // لكل الأوردرات القديمة اللي كانت موجودة قبل كده
+        const stored = localStorage.getItem(STORAGE_KEY);
+        if (!stored) {
+          const res = await api.get<{ latestId: number }>('/Orders/latest-id');
+          lastSeenIdRef.current = res.data.latestId;
+          localStorage.setItem(STORAGE_KEY, String(res.data.latestId));
+          return;
+        }
+        // لو فيه قيمة متخزنة بالفعل (يعني الكومبوننت بيتعمل له remount بس مش أول مرة)
+        // منعملش reset، ونكمل نتشيك عادي على أي حاجة جت بعد آخر Id محفوظ
       }
+
       const res = await api.get<NewOrderNotification[]>(`/Orders/new?afterId=${lastSeenIdRef.current}`);
       if (res.data.length > 0) {
         setQueue((prev) => [...prev, ...res.data]);
