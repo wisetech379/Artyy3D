@@ -10,6 +10,41 @@ import { testimonials, faqs } from '@/data';
 import type { Product } from '@/types';
 import * as Icons from 'lucide-react';
 
+type ApiProduct = {
+  id?: number | string | null;
+  name?: string | null;
+  description?: string | null;
+  category?: string | null;
+  price?: number | string | null;
+  images?: string[] | null;
+  imageUrl?: string | null;
+  rating?: number | string | null;
+  reviews?: number | string | null;
+  dimensions?: string | null;
+  colors?: string[] | null;
+  sizes?: string[] | null;
+  stock?: number | string | null;
+  featured?: boolean | null;
+};
+
+const PRODUCT_CATEGORIES: Product['category'][] = [
+  'Home',
+  'Makeup',
+  'Doctors',
+  'Cars',
+  'Phone Accessories',
+  'Kitchen',
+  'Graduation Projects',
+];
+
+const normalizeCategory = (value: string | null | undefined): Product['category'] => {
+  if (value && PRODUCT_CATEGORIES.includes(value as Product['category'])) {
+    return value as Product['category'];
+  }
+
+  return 'Home';
+};
+
 const features = [
   { icon: 'Gem', title: 'Premium Quality', text: 'Materials chosen to last and finishes worth keeping.' },
   { icon: 'Zap', title: 'Fast Delivery', text: 'Most orders leave our studio in days, not weeks.' },
@@ -36,22 +71,30 @@ export default function Home() {
     const load = async () => {
       try {
         const res = await fetch(`${API_BASE}/Products`);
-        const data = await res.json();
-        const mapped: Product[] = (data || []).map((item: any) => ({
-          id: String(item.id),
-          name: item.name ?? 'Unknown Product',
-          description: item.description ?? '',
-          category: (item.category ?? 'Custom') as any,
-          price: Number(item.price ?? 0),
-          images: item.images && item.images.length ? item.images : item.imageUrl ? [item.imageUrl] : ['/img/placeholder.png'],
-          rating: Number(item.rating ?? 0),
-          reviews: Number(item.reviews ?? 0),
-          dimensions: item.dimensions ?? '',
-          colors: item.colors ?? [],
-          sizes: item.sizes ?? [],
-          stock: Number(item.stock ?? 0),
-          featured: Boolean(item.featured ?? false),
-        }));
+        const data = (await res.json()) as ApiProduct[] | null;
+        const mapped: Product[] = (data ?? []).map((item) => {
+          const images = Array.isArray(item.images) && item.images.length > 0
+            ? item.images
+            : item.imageUrl
+              ? [item.imageUrl]
+              : ['/img/placeholder.png'];
+
+          return {
+            id: String(item.id ?? crypto.randomUUID()),
+            name: item.name ?? 'Unknown Product',
+            description: item.description ?? '',
+            category: normalizeCategory(item.category ?? undefined),
+            price: Number(item.price ?? 0),
+            images,
+            rating: Number(item.rating ?? 0),
+            reviews: Number(item.reviews ?? 0),
+            dimensions: item.dimensions ?? '',
+            colors: item.colors ?? [],
+            sizes: item.sizes ?? [],
+            stock: Number(item.stock ?? 0),
+            featured: Boolean(item.featured ?? false),
+          };
+        });
 
         setFeatured(mapped.filter((p) => p.featured).slice(0, 4));
       } catch (error) {

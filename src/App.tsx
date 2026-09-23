@@ -82,11 +82,11 @@ export default function App() {
                     <Route path="/login" element={<Login />} />
                     <Route path="/register" element={<Register />} />
                     <Route path="/forgot-password" element={<ForgotPassword />} />
+                    <Route path="/checkout" element={<Checkout />} />
                     <Route path="/order-success" element={<OrderSuccess />} />
 
                     {/* Protected User Routes */}
                     <Route element={<ProtectedRoute />}>
-                      <Route path="/checkout" element={<Checkout />} />
                       <Route path="/my-orders" element={<MyOrders />} />
                     </Route>
 

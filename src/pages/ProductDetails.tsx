@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Minus, Plus, ShoppingBag, Zap, ChevronLeft, ChevronRight } from 'lucide-react';
+import { ArrowLeft, Minus, Plus, ShoppingBag, Zap, ChevronLeft, ChevronRight, Palette } from 'lucide-react';
 import { toast } from 'sonner';
 import { useSEO } from '@/hooks/useSEO';
 import { Reveal, StarRating } from '@/components/ui';
@@ -35,15 +35,7 @@ interface ApiProductItem {
   featured?: boolean;
 }
 
-const AVAILABLE_COLORS = [
-  { name: 'White', hex: '#FFFFFF', border: 'border-white/40' },
-  { name: 'Black', hex: '#000000', border: 'border-white/20' },
-  { name: 'Red', hex: '#EF4444', border: 'border-red-500/40' },
-  { name: 'Blue', hex: '#3B82F6', border: 'border-blue-500/40' },
-  { name: 'Pink', hex: '#EC4899', border: 'border-pink-500/40' },
-  { name: 'Navy', hex: '#0F172A', border: 'border-blue-900/40' },
-  { name: 'Gray', hex: '#6B7280', border: 'border-gray-500/40' },
-];
+const DEFAULT_COLORS = ['White', 'Black', 'Red', 'Blue', 'Pink', 'Navy', 'Gray'];
 
 // الباك بيرجع الصور كمصفوفة objects { id, imageUrl } دلوقتي بدل مصفوفة نصوص،
 // الدالة دي بتتعامل مع الحالتين (نص أو object) عشان الكود يفضل شغال في الحالتين
@@ -65,7 +57,7 @@ export default function ProductDetails() {
   const { add } = useCart();
   const [activeImage, setActiveImage] = useState(0);
   const [quantity, setQuantity] = useState(1);
-  const [selectedColor, setSelectedColor] = useState<string>('White');
+  const [customColor, setCustomColor] = useState<string>('');
   const [isHovering, setIsHovering] = useState(false);
   const [touchStart, setTouchStart] = useState<number | null>(null);
   const autoSlideRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -88,7 +80,7 @@ export default function ProductDetails() {
           rating: Number(data.rating ?? 5),
           reviews: Number(data.reviews ?? 1),
           dimensions: data.dimensions ?? '',
-          colors: data.colors && data.colors.length ? data.colors : AVAILABLE_COLORS.map((c) => c.name),
+          colors: data.colors && data.colors.length ? data.colors : DEFAULT_COLORS,
           sizes: [],
           stock: data.inStock !== undefined ? (data.inStock ? 10 : 0) : Number(data.stock ?? 10),
           featured: Boolean(data.featured ?? data.inStock ?? true),
@@ -96,7 +88,7 @@ export default function ProductDetails() {
 
         setProduct(mapped);
         setActiveImage(0);
-        setSelectedColor(AVAILABLE_COLORS[0].name);
+        setCustomColor('');
 
         const listRes = await api.get('/Products');
         const listData: ApiProductItem[] = listRes.data;
@@ -110,7 +102,7 @@ export default function ProductDetails() {
           rating: Number(item.rating ?? 5),
           reviews: Number(item.reviews ?? 1),
           dimensions: item.dimensions ?? '',
-          colors: item.colors && item.colors.length ? item.colors : AVAILABLE_COLORS.map((c) => c.name),
+          colors: item.colors && item.colors.length ? item.colors : DEFAULT_COLORS,
           sizes: [],
           stock: item.inStock !== undefined ? (item.inStock ? 10 : 0) : Number(item.stock ?? 10),
           featured: Boolean(item.featured ?? item.inStock ?? true),
@@ -187,9 +179,9 @@ export default function ProductDetails() {
   };
 
   const handleAdd = () => {
-    add(product, quantity, undefined, selectedColor);
+    add(product, quantity, undefined, customColor || 'Not specified');
     toast.success('Added to Cart', {
-      description: `${product.name} (${selectedColor}) x${quantity} added to your bag.`,
+      description: `${product.name}${customColor ? ` (${customColor})` : ''} x${quantity} added to your bag.`,
       action: {
         label: 'View Cart',
         onClick: () => navigate('/checkout'),
@@ -198,7 +190,7 @@ export default function ProductDetails() {
   };
 
   const handleBuyNow = () => {
-    add(product, quantity, undefined, selectedColor);
+    add(product, quantity, undefined, customColor || 'Not specified');
     navigate('/checkout');
   };
 
@@ -306,34 +298,21 @@ export default function ProductDetails() {
                 </div>
               )}
 
-              {/* Color Selection - Swatches */}
+              {/* Custom Color Request - بدل الدواير، اليوزر بيكتب اللون اللي عايزه */}
               <div>
-                <div className="flex items-center gap-2">
-                  <p className="text-sm font-medium text-white/70">Color:</p>
-                  <span className="text-sm font-semibold text-white">{selectedColor}</span>
-                </div>
-                <div className="mt-3 flex flex-wrap items-center gap-3">
-                  {AVAILABLE_COLORS.map((c) => {
-                    const isSelected = selectedColor.toLowerCase() === c.name.toLowerCase();
-                    return (
-                      <button
-                        key={c.name}
-                        type="button"
-                        onClick={() => setSelectedColor(c.name)}
-                        title={c.name}
-                        className={`group relative h-9 w-9 rounded-full transition-all duration-150 focus:outline-none ${
-                          isSelected
-                            ? 'scale-110 ring-2 ring-ember ring-offset-2 ring-offset-ink'
-                            : 'opacity-85 hover:scale-105 hover:opacity-100'
-                        }`}
-                        style={{ backgroundColor: c.hex }}
-                      >
-                        <span
-                          className={`absolute inset-0 rounded-full border ${c.border || 'border-white/10'}`}
-                        />
-                      </button>
-                    );
-                  })}
+                <p className="text-sm font-medium text-white/70">Color</p>
+                <p className="mt-1 text-sm text-white/50">
+                  We can make this product or design in any color you'd like — just tell us.
+                </p>
+                <div className="mt-3 flex items-center gap-2 rounded-lg border border-white/10 bg-neutral-900 px-3 py-2.5 focus-within:border-ember">
+                  <Palette size={16} className="shrink-0 text-white/40" />
+                  <input
+                    type="text"
+                    value={customColor}
+                    onChange={(e) => setCustomColor(e.target.value)}
+                    placeholder="Type your preferred color (e.g. Emerald Green)"
+                    className="w-full bg-transparent text-sm text-white placeholder:text-white/30 focus:outline-none"
+                  />
                 </div>
               </div>
 
@@ -377,7 +356,7 @@ export default function ProductDetails() {
       {related.length > 0 && (
         <section className="mt-20">
           <h2 className="text-2xl font-bold text-white">Related Products</h2>
-          <div className="mt-8 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="mt-8 grid grid-cols-2 gap-3 sm:gap-6 sm:grid-cols-2 lg:grid-cols-4">
             {related.map((p, i) => (
               <Reveal key={p.id} delay={i * 80}>
                 <ProductCard product={p} />

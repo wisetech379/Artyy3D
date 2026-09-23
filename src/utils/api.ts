@@ -22,11 +22,17 @@ api.interceptors.request.use(
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response && error.response.status === 401) {
+    const hadToken = !!localStorage.getItem('token');
+
+    // منعمل redirect للـ login غير لو اليوزر كان أصلاً عنده توكن (يعني جلسته انتهت)
+    // لو الطلب اتبعت من غير توكن من الأساس (زيار/guest) مبنعملش تحويل،
+    // وبنسيب الصفحة اللي بعتت الطلب هي اللي تتعامل مع الخطأ (زي رسالة toast)
+    if (error.response && error.response.status === 401 && hadToken) {
       localStorage.removeItem('token');
       localStorage.removeItem('user');
       window.location.href = '/login';
     }
+
     return Promise.reject(error);
   }
 );

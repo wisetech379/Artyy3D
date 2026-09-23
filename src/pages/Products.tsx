@@ -15,6 +15,8 @@ const CATEGORIES_LIST: (Category | 'All')[] = [
   'Makeup',
   'Doctors',
   'Cars',
+  'Phone Accessories', // <-- الفئة الجديدة الأولى
+  'Kitchen',           // <-- الفئة الجديدة الثانية
   'Graduation Projects'
 ];
 
@@ -180,7 +182,7 @@ export default function Products() {
           </div>
         ) : (
           <>
-            <div className="mt-8 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+            <div className="mt-8 grid grid-cols-2 gap-3 sm:gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
               {filtered.slice(0, visible).map((product, i) => (
                 <Reveal key={product.id} delay={(i % 4) * 60}>
                   <ProductCard product={product} />
